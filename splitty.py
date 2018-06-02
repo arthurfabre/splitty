@@ -5,8 +5,8 @@ import csv
 import sys
 import argparse
 
-# CSV:
-# Payer,Amount,Splliter1 Splitter2 ...SplitterN
+EXPENSES_CSV = ['payer', 'amount', 'splitters']
+TRANSACTIONS_CSV = ['sender', 'amount', 'recipient']
 
 class Person:
     def __init__(self, name):
@@ -57,7 +57,7 @@ def parse_csv(expenses_file):
     persons = {}
 
     # Parse the expenses from CSV
-    expenses_reader = csv.DictReader(expenses_file, fieldnames=['payer', 'amount', 'splitters'])
+    expenses_reader = csv.DictReader(expenses_file, fieldnames=EXPENSES_CSV)
     for row in expenses_reader:
         payer = persons.setdefault(row['payer'], Person(row['payer']))
         amount = decimal.Decimal(row['amount'])
@@ -87,7 +87,7 @@ def transactions(expenses, persons, precision):
     return transactions
 
 def write_csv(transactions, transactions_file):
-    writer = csv.DictWriter(transactions_file, fieldnames=['sender', 'amount', 'recipient'])
+    writer = csv.DictWriter(transactions_file, fieldnames=TRANSACTIONS_CSV)
     writer.writeheader()
 
     for t in transactions:
@@ -95,8 +95,8 @@ def write_csv(transactions, transactions_file):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Split some expenses into a minimal set of transactions.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('expenses', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="CSV formatted list of expenses to read")
-    parser.add_argument('transactions', nargs='?', type=argparse.FileType('w'), default=sys.stdout, help="CSV formatted list of minimal transactions to write")
+    parser.add_argument('expenses', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="CSV formatted list of expenses to read, columns: %s, splitters whitespace seperated" % EXPENSES_CSV)
+    parser.add_argument('transactions', nargs='?', type=argparse.FileType('w'), default=sys.stdout, help="CSV formatted list of minimal transactions to write, columns: %s" % TRANSACTIONS_CSV)
     parser.add_argument('-p', '--precision', type=decimal.Decimal, default=decimal.Decimal('0.01'), help="Smallest usable currency amount when splitting expenses")
     args = parser.parse_args()
 
