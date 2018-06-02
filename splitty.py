@@ -75,7 +75,7 @@ def transactions(expenses, persons, precision):
     # Starting balancing balances, biggest one first
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Split some expenses into a minimal set of transactions.')
+    parser = argparse.ArgumentParser(description='Split some expenses into a minimal set of transactions.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('expenses', nargs='?', type=argparse.FileType('r'), default=sys.stdin, help="CSV formatted list of expenses to read")
     parser.add_argument('transactions', nargs='?', type=argparse.FileType('w'), default=sys.stdout, help="CSV formatted list of minimal transactions to write")
     parser.add_argument('-p', '--precision', type=decimal.Decimal, default=decimal.Decimal('0.01'), help="Smallest usable currency amount when splitting expenses")
