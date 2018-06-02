@@ -37,14 +37,20 @@ class Expense:
                 splitter_amount += precision
                 split_remain -= precision
 
-            splitter.balance -= splitter_amount
-            self.payer.balance += splitter_amount
+            splitter.balance += splitter_amount
+            self.payer.balance -= splitter_amount
 
 class Transaction:
     def __init__(self, amount, sender, recipient):
         self.amount = amount
         self.sender = sender
         self.recipient = recipient
+
+        self.sender.balance -= amount
+        self.recipient.balance += amount
+
+    def __repr__(self):
+        return "<Transaction from:%s to:%s amount:%s>" % (self.sender, self.recipient, self.amount)
 
 def parse_csv(expenses_file):
     expenses = []
@@ -59,7 +65,7 @@ def parse_csv(expenses_file):
 
         expenses.append(Expense(amount, payer, splitters))
 
-    return expenses, persons
+    return expenses, persons.values()
 
 def transactions(expenses, persons, precision):
     # Balance all the expenses to get everyone's final balance
@@ -67,12 +73,23 @@ def transactions(expenses, persons, precision):
         expense.balance(precision)
 
     # Check everyone's balance adds up to 0
-    print(persons)
-
-    if sum([p.balance for p in persons.values()]) != 0:
+    if sum([p.balance for p in persons]) != 0:
         sys.exit("Internal error: balance sum not 0")
 
-    # Starting balancing balances, biggest one first
+    transactions = []
+
+    while any(p.balance != 0 for p in persons):
+        debtor = max(persons, key=lambda p: p.balance)
+        creditor = min(persons, key=lambda p: p.balance)
+
+        transactions.append(Transaction(min(abs(debtor.balance), abs(creditor.balance)), debtor, creditor))
+
+    return transactions
+
+def write_csv(transactions, transactions_file):
+    # TODO
+    print(transactions)
+    pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Split some expenses into a minimal set of transactions.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -81,4 +98,4 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--precision', type=decimal.Decimal, default=decimal.Decimal('0.01'), help="Smallest usable currency amount when splitting expenses")
     args = parser.parse_args()
 
-    transactions(*parse_csv(args.expenses), args.precision)
+    write_csv(transactions(*parse_csv(args.expenses), args.precision), args.transactions)
