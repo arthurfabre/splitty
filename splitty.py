@@ -87,9 +87,11 @@ def transactions(expenses, persons, precision):
     return transactions
 
 def write_csv(transactions, transactions_file):
-    # TODO
-    print(transactions)
-    pass
+    writer = csv.DictWriter(transactions_file, fieldnames=['sender', 'amount', 'recipient'])
+    writer.writeheader()
+
+    for t in transactions:
+        writer.writerow({'sender': t.sender.name, 'amount': t.amount, 'recipient': t.recipient.name})
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Split some expenses into a minimal set of transactions.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
