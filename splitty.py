@@ -74,6 +74,10 @@ def parse_csv(expenses_file):
     # Parse the expenses from CSV
     expenses_reader = csv.DictReader(expenses_file, fieldnames=EXPENSES_CSV)
     for row in expenses_reader:
+        # Skip comments
+        if row['payer'][0] == '#':
+            continue
+
         payer = persons.setdefault(row['payer'], Person(row['payer']))
         amount = decimal.Decimal(row['amount'])
         splitters = [persons.setdefault(name, Person(name)) for name in row['splitters'].split()]
